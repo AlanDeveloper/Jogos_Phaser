@@ -1,12 +1,16 @@
+// Abrir index.html a partir do firefox para que o jogo funcione
+
+
+// Iniciando configurações do jogo
 var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 function preload() {
 
+    // Carregamento de arquivos
     game.load.image('sky', 'assets/sky.png');
     game.load.image('ground', 'assets/platform.png');
     game.load.image('star', 'assets/star.png');
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
-
 }
 
 var player;
@@ -19,111 +23,111 @@ var scoreText;
 
 function create() {
 
-    //  We're going to be using physics, so enable the Arcade Physics system
+    // Antes de poder adicionar a física ao jogo devemos iniciar um tipo de física
+    // Para saber melhor dos tipos de físicas 
+    // https://phaser.io/docs/2.4.4/Phaser.Physics.html
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
-    //  A simple background for our game
+    // Adicionando background onde deve ficar e seu nome
     game.add.sprite(0, 0, 'sky');
 
-    //  The platforms group contains the ground and the 2 ledges we can jump on
     platforms = game.add.group();
 
-    //  We will enable physics for any object that is created in this group
+    //  Habilitar a física a qualquer objeto criado no grupo 'platforms'
     platforms.enableBody = true;
 
-    // Here we create the ground.
+    // Chão
     var ground = platforms.create(0, game.world.height - 64, 'ground');
 
-    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
+    //  Duplicando o chão pelo fato da plataforma ser pequena para preencher todo chão
     ground.scale.setTo(2, 2);
 
-    //  This stops it from falling away when you jump on it
+    //  Impedindo que caia ao pular nele
     ground.body.immovable = true;
 
-    //  Now let's create two ledges
+    //  Segunda plataforma
     var ledge = platforms.create(400, 400, 'ground');
     ledge.body.immovable = true;
 
     ledge = platforms.create(-150, 250, 'ground');
-    ledge.body.immovable = true;
+    ledge.body.immovable = false;
 
-    // The player and its settings
+    // Adicionando player
     player = game.add.sprite(32, game.world.height - 150, 'dude');
 
-    //  We need to enable physics on the player
+    //  Adicionando a física ao player
     game.physics.arcade.enable(player);
 
-    //  Player physics properties. Give the little guy a slight bounce.
+    //  Configurando física
+    // Quanta força será devolvida ao player depois do pulo
     player.body.bounce.y = 0.2;
+    // Pulo quanto mais alto número menor o pulo
     player.body.gravity.y = 300;
+    // Impedindo que ele suma da tela
     player.body.collideWorldBounds = true;
 
-    //  Our two animations, walking left and right.
+    //  Animações
     player.animations.add('left', [0, 1, 2, 3], 10, true);
     player.animations.add('right', [5, 6, 7, 8], 10, true);
 
-    //  Finally some stars to collect
+    //  Criando grupo
     stars = game.add.group();
-
-    //  We will enable physics for any star that is created in this group
     stars.enableBody = true;
 
-    //  Here we'll create 12 of them evenly spaced apart
+    //  Criando 12 estrelas
     for (var i = 0; i < 12; i++)
     {
-        //  Create a star inside of the 'stars' group
         var star = stars.create(i * 70, 0, 'star');
 
-        //  Let gravity do its thing
+        //  Gravidade
         star.body.gravity.y = 300;
 
-        //  This just gives each star a slightly random bounce value
+        //  Força devolvida será diferente para cada estrela
         star.body.bounce.y = 0.7 + Math.random() * 0.2;
     }
 
-    //  The score
+    //  Score
     scoreText = game.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
 
-    //  Our controls.
+    // Controles 
     cursors = game.input.keyboard.createCursorKeys();
     
 }
 
 function update() {
 
-    //  Collide the player and the stars with the platforms
+    //  Adicionando colisão entre plataformas e estrelas
     var hitPlatform = game.physics.arcade.collide(player, platforms);
     game.physics.arcade.collide(stars, platforms);
 
-    //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
+    //  Verificação para ver se dois corpos se encostaram
     game.physics.arcade.overlap(player, stars, collectStar, null, this);
 
-    //  Reset the players velocity (movement)
+    //  Adicionando velocidade do player
     player.body.velocity.x = 0;
 
     if (cursors.left.isDown)
     {
-        //  Move to the left
+        // Esquerda
         player.body.velocity.x = -150;
 
         player.animations.play('left');
     }
     else if (cursors.right.isDown)
     {
-        //  Move to the right
+        // Direita
         player.body.velocity.x = 150;
 
         player.animations.play('right');
     }
     else
     {
-        //  Stand still
+        // Parando animação
         player.animations.stop();
-
         player.frame = 4;
     }
     
-    //  Allow the player to jump if they are touching the ground.
+    //  Permite que jogador pule ao tocar no chão
     if (cursors.up.isDown && player.body.touching.down && hitPlatform)
     {
         player.body.velocity.y = -350;
@@ -133,10 +137,10 @@ function update() {
 
 function collectStar (player, star) {
     
-    // Removes the star from the screen
+    // Remove estrelas
     star.kill();
 
-    //  Add and update the score
+    //  Adiciona o score
     score += 10;
     scoreText.text = 'Score: ' + score;
 
