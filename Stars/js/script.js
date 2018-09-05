@@ -133,6 +133,14 @@ function update() {
         player.body.velocity.y = -350;
     }
 
+
+    // Para a vitória
+
+    if (score === 120) {
+        var fim = game.add.text(game.world.height / 1.8, game.world.height / 2, 'Ganhou !', { fontSize: '32px', fill: '#000' });
+        score = 0;
+        player.kill();
+    }
 }
 
 function collectStar (player, star) {
